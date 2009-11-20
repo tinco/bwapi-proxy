@@ -11,7 +11,7 @@
  * TODO: modify core BWAPI to assign IDs to units and provide a way of retrieving
  *       units by their ID 
  */
-#include "ExampleAIModule.h"
+#include "ClientModule.h"
 using namespace BWAPI;
 
 #include <winsock.h>
@@ -81,7 +81,7 @@ int append(int val, char* buf, int currentIndex);
 /**
  * Called at the start of a match. 
  */
-void ExampleAIModule::onStart()
+void ClientModule::onStart()
 {
 	loadTypeMaps();
 
@@ -211,7 +211,7 @@ void ExampleAIModule::onStart()
  *
  * Sends the unit status to the ProxyBot, then waits for a list of command messages.
  */
-void ExampleAIModule::onFrame()
+void ClientModule::onFrame()
 {
 	// check if the Proxy Bot is connected
 	if (proxyBotSocket == -1) {
@@ -708,7 +708,7 @@ void handleCommand(int command, int unitID, int arg0, int arg1, int arg2)
  * Called at the end of a game. This is where we shut down sockets and clean
  * up any data structures we have created.
  */
-void ExampleAIModule::onEnd() 
+void ClientModule::onEnd() 
 {
 	if (proxyBotSocket == -1) {
 		return;
@@ -717,7 +717,7 @@ void ExampleAIModule::onEnd()
 	closesocket(proxyBotSocket);
 }
 
-void ExampleAIModule::onAddUnit(Unit* unit)
+void ClientModule::onAddUnit(Unit* unit)
 {
 	
 }
@@ -725,13 +725,13 @@ void ExampleAIModule::onAddUnit(Unit* unit)
 /**
  * Removes the unit from the ID->unit mapping
  */
-void ExampleAIModule::onRemove(BWAPI::Unit* unit)
+void ClientModule::onRemove(BWAPI::Unit* unit)
 {
 	int key = unitMap.erase(unit);
 	unitIDMap.erase(key);
 }
 
-bool ExampleAIModule::onSendText(std::string text)
+bool ClientModule::onSendText(std::string text)
 {
 	return true;
 }

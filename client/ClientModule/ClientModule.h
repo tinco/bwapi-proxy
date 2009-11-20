@@ -1,7 +1,7 @@
 #pragma once
 #include <BWAPI.h>
 #include <BWTA.h>
-class ExampleAIModule : public BWAPI::AIModule
+class ClientModule : public BWAPI::AIModule
 {
 public:
   virtual void onStart();
