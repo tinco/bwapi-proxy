@@ -717,7 +717,7 @@ void ClientModule::onEnd()
 	closesocket(proxyBotSocket);
 }
 
-void ClientModule::onAddUnit(Unit* unit)
+void ClientModule::onUnitCreate(Unit* unit)
 {
 	
 }
@@ -725,7 +725,7 @@ void ClientModule::onAddUnit(Unit* unit)
 /**
  * Removes the unit from the ID->unit mapping
  */
-void ClientModule::onRemove(BWAPI::Unit* unit)
+void ClientModule::onUnitDestroy(BWAPI::Unit* unit)
 {
 	int key = unitMap.erase(unit);
 	unitIDMap.erase(key);
