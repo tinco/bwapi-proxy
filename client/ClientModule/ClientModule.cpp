@@ -176,6 +176,7 @@ void ClientModule::onStart()
 
 	// 5. Send chokepoint data
 	if (terrainAnalysis) {
+    BWTA::readMap();
 		BWTA::analyze();
 
 		std::string chokes("Chokes");
