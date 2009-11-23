@@ -158,17 +158,30 @@ void ClientModule::onStart()
 	int mapHeight = Broodwar->mapHeight();
 
 	std::string mapData(mapName);
+	std::string heightData("");
+	std::string walkData("");
 	mapData += ":" + toString(mapWidth)
-  	 		 + ":" + toString(mapHeight)
-			 + ":";
+		+ ":" + toString(mapHeight)
+		+ ":";
 
 	for (int y=0; y<mapHeight; y++) {	
 		for (int x=0; x<mapWidth; x++) {
-			mapData += toString(Broodwar->groundHeight(4*x, 4*y));
 			mapData += (Broodwar->buildable(x, y)) ? "1" : "0";
-			mapData += (Broodwar->walkable(4*x, 4*y)) ? "1" : "0";
 		}
 	}
+
+	mapData += ":";
+
+	for (int y=0; y < mapHeight * 4; y++) {
+		for (int x=0; x < mapWidth * 4; x++) {
+			heightData += toString(Broodwar->groundHeight(x, y));
+			walkData += (Broodwar->walkable(x, y)) ? "1" : "0";
+		}
+	}
+
+	mapData += heightData;
+	mapData += ":";
+	mapData += walkData;
 
 	mapData += "\n";
 	char *sbuf = (char*)mapData.c_str();
@@ -176,7 +189,7 @@ void ClientModule::onStart()
 
 	// 5. Send chokepoint data
 	if (terrainAnalysis) {
-    BWTA::readMap();
+		BWTA::readMap();
 		BWTA::analyze();
 
 		std::string chokes("Chokes");
