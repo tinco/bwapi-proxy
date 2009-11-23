@@ -273,7 +273,7 @@ public class UnitTypeWME {
 	public UnitTypeWME(int id, Race race, String name, int mineralsCost, int gasCost, int maxHitPoints, 
 			int maxShields, int maxEnergy, int buildTime, boolean canAttack, boolean canMove,
 			int tileWidth, int tileHeight, int supplyRequired, int supplyProvided,
-			int sightRange, int groundMinRange, int groundMaxRange, int groundDamage,
+			int sightRange, int groundMaxRange, int groundMinRange, int groundDamage,
 			int airRange, int airDamage, boolean building, boolean flyer,
 			boolean spellCaster, boolean worker, int whatBuilds) {
 
