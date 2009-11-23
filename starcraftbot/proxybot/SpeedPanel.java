@@ -10,7 +10,7 @@ import javax.swing.event.ChangeListener;
 
 public class SpeedPanel extends JPanel {
 
-	public int initialSpeed = 20;
+	public int initialSpeed = 50;
 	public int slowest = 100;
 	public int fastest = 0;
 
