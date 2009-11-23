@@ -176,7 +176,7 @@ void ClientModule::onStart()
 
 	// 5. Send chokepoint data
 	if (terrainAnalysis) {
-    BWTA::readMap();
+		BWTA::readMap();
 		BWTA::analyze();
 
 		std::string chokes("Chokes");
@@ -205,6 +205,71 @@ void ClientModule::onStart()
 		char *sbbuf = (char*)bases.c_str();
 		send(proxyBotSocket, sbbuf, bases.size(), 0);
 	}
+/*
+	// 7. Send unit type data
+	  std::set<UnitType> types = UnitTypes::allUnitTypes();
+	  for(std::set<UnitType>::iterator i=types.begin();i!=types.end();i++)
+	  {
+		  int id = i->getID();
+		  std::string race = i->getRace().getName();
+		  std::string name = i->getName();
+		  int minerals = i->mineralPrice();
+		  int gas = i->gasPrice();
+		  int hitPoints = i->maxHitPoints()/256;
+		  int shields = i->maxShields();
+		  int energy = i->maxEnergy();
+		  int buildTime = i->buildTime();
+		  bool canAttack = i->canAttack();
+		  bool canMove = i->canMove();
+		  int width = i->tileWidth();
+		  int height = i->tileHeight();
+		  int supplyRequired = i->supplyRequired();
+		  int supplyProvided = i->supplyProvided();
+		  int sightRange = i->sightRange();
+		  int groundMaxRange = i->groundWeapon()->maxRange();
+		  int groundMinRange = i->groundWeapon()->minRange();
+		  int groundDamage = i->groundWeapon()->damageAmount();
+		  int airRange = i->airWeapon()->maxRange();
+		  int airDamage = i->airWeapon()->damageAmount();
+		  bool isBuilding = i->isBuilding();
+		  bool isFlyer = i->isFlyer();
+		  bool isSpellCaster = i->isSpellcaster();
+		  bool isWorker = i->isWorker();
+		  int whatBuilds = i->whatBuilds().first->getID();
+
+		  std::string unitType("UnitType");
+		  unitType += ":" + toString(id)
+				  + ";" + race
+				  + ";" + name
+				  + ";" + toString(minerals)
+				  + ";" + toString(gas)
+				  + ";" + toString(hitPoints)
+				  + ";" + toString(shields)
+				  + ";" + toString(energy)
+				  + ";" + toString(buildTime)
+				  + ";" + toString(canAttack)
+				  + ";" + toString(canMove)
+				  + ";" + toString(width)
+				  + ";" + toString(height)
+				  + ";" + toString(supplyRequired)
+				  + ";" + toString(supplyProvided)
+				  + ";" + toString(sightRange)
+				  + ";" + toString(groundMaxRange)
+				  + ";" + toString(groundMinRange)
+				  + ";" + toString(groundDamage)
+				  + ";" + toString(airRange)
+				  + ";" + toString(airDamage)
+				  + ";" + toString(isBuilding)
+				  + ";" + toString(isFlyer)
+				  + ";" + toString(isSpellCaster)
+				  + ";" + toString(isWorker)
+				  + ";" + toString(whatBuilds);
+
+		  unitType += "\n";
+		char *subuf = (char*)unitType.c_str();
+		send(proxyBotSocket, subuf, unitType.size(), 0);
+	  }
+	  */
 }
 
 /**
@@ -249,10 +314,10 @@ void ClientModule::onFrame()
 
 	std::set<TechType> tektypes = TechTypes::allTechTypes();
 	for(std::set<TechType>::iterator i=tektypes.begin();i!=tektypes.end();i++) {
-		if (Broodwar->self()->researched((*i))) {
+		if (Broodwar->self()->hasResearched((*i))) {
 			research[(*i).getID()] = 4;
 		}
-		else if (Broodwar->self()->researching((*i))) {
+		else if (Broodwar->self()->isResearching((*i))) {
 			research[(*i).getID()] = 1;
 		}
 		else {
@@ -271,11 +336,11 @@ void ClientModule::onFrame()
 
 	std::set<UpgradeType> upTypes = UpgradeTypes::allUpgradeTypes();
 	for(std::set<UpgradeType>::iterator i=upTypes.begin();i!=upTypes.end();i++) {
-		if (Broodwar->self()->upgrading((*i))) {
+		if (Broodwar->self()->isUpgrading((*i))) {
 			ups[(*i).getID()] = 4;
 		}
 		else {
-			ups[(*i).getID()] = Broodwar->self()->upgradeLevel((*i));
+			ups[(*i).getID()] = Broodwar->self()->getUpgradeLevel((*i));
 		}
 	}
 
