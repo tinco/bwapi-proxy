@@ -27,6 +27,12 @@ public class UnitWME {
 	/** y tile position */
 	private int y;
 
+	/** x velocity in pixels per frame */
+	private double velocityX;
+
+	/** y velocity in pixels per frame */
+	private double velocityY;
+
 	/** unit hit points */
 	private int hitPoints;
 
@@ -49,7 +55,6 @@ public class UnitWME {
 
 	/**
 	 * Order type currently being executed by the unit.
-	 * 
 	 * @See the Order enum in Constants.java
 	 */
 	private int order;
@@ -62,7 +67,8 @@ public class UnitWME {
 	/**
 	 * Parses the unit data.
 	 */
-	public static ArrayList<UnitWME> getUnits(String unitData, HashMap<Integer, UnitTypeWME> types, int playerID, PlayerWME[] players) {
+	public static ArrayList<UnitWME> getUnits(String unitData, HashMap<Integer, UnitTypeWME> types,
+			int playerID, PlayerWME[] players) {
 
 		ArrayList<UnitWME> units = new ArrayList<UnitWME>();
 		String[] unitDatas = unitData.split(":");
@@ -81,13 +87,17 @@ public class UnitWME {
 
 			if (pID == playerID) {
 				unit = new PlayerUnitWME();
-			} else if (type == UnitType.Resource_Mineral_Field.ordinal()) {
+			}
+			else if (type == UnitType.Resource_Mineral_Field.ordinal()) {
 				unit = new MineralWME();
-			} else if (type == UnitType.Resource_Vespene_Geyser.ordinal()) {
+			}
+			else if (type == UnitType.Resource_Vespene_Geyser.ordinal()) {
 				unit = new GeyserWME();
-			} else if (pID != playerID && pID != 11 && !players[pID].isAlly()) {
+			}
+			else if(pID != playerID && pID != 11 && !players[pID].isAlly()) {
 				unit = new EnemyUnitWME();
-			} else if (pID != playerID && pID != 11 && players[pID].isAlly()) {
+			}
+			else if(pID != playerID && pID != 11 && players[pID].isAlly()) {
 				unit = new AllyUnitWME();
 			}
 
@@ -108,10 +118,49 @@ public class UnitWME {
 			unit.resources = Integer.parseInt(attributes[14]);
 			unit.addonID = Integer.parseInt(attributes[15]);
 			unit.mineCount = Integer.parseInt(attributes[16]);
+			unit.velocityX = Integer.parseInt(attributes[17]);
+			unit.velocityY = Integer.parseInt(attributes[18]);
 			units.add(unit);
 		}
 
 		return units;
+	}
+
+	/**
+	 * Updates the unit list passed in.
+	 */
+	public static ArrayList<UnitWME> updateUnits(ArrayList<UnitWME> army, ArrayList<UnitWME> units) {
+
+		ArrayList<UnitWME> newArmy = new ArrayList<UnitWME>();
+
+		for (UnitWME soldier : army) {
+
+			for (UnitWME unit : units) {
+				if (unit.ID == soldier.ID) {
+					if (unit.hitPoints == 0) {
+			 			//System.out.println("this unit is dead, remove him and keep it moving.");
+						continue;
+					}
+
+					soldier.playerID = unit.playerID;
+					soldier.type = unit.type;
+					soldier.x = unit.x;
+					soldier.y = unit.y;
+					soldier.hitPoints = unit.hitPoints;
+					soldier.shields = unit.shields;
+					soldier.energy = unit.energy;
+					soldier.orderTimer = unit.orderTimer;
+					soldier.order = unit.order;
+					soldier.resources = unit.resources;
+					soldier.mineCount = unit.mineCount;
+					soldier.velocityX = unit.velocityX;
+					soldier.velocityY = unit.velocityY;
+					newArmy.add(soldier);
+				}
+			}
+		}
+
+		return newArmy;
 	}
 
 	public int getMineCount() {
@@ -137,7 +186,7 @@ public class UnitWME {
 		double dx = unit.x - x;
 		double dy = unit.y - y;
 
-		return Math.sqrt(dx * dx + dy * dy);
+		return Math.sqrt(dx*dx + dy*dy);
 	}
 
 	/**
@@ -163,7 +212,6 @@ public class UnitWME {
 
 	/**
 	 * Returns the id of the player controlling the unit.
-	 * 
 	 * @return
 	 */
 	public int getPlayerID() {
@@ -237,7 +285,6 @@ public class UnitWME {
 	public int getBuildTimer() {
 		return buildTimer;
 	}
-
 	public int getTrainTimer() {
 		return trainTimer;
 	}
@@ -251,36 +298,48 @@ public class UnitWME {
 	}
 
 	/**
-	 * Specifies the amount of resources remaining (for mineral patches and
-	 * geysers)
+	 * Specifies the amount of resources remaining (for mineral patches and geysers)
 	 */
 	public int getResources() {
 		return resources;
 	}
 
 	public String toString() {
-		return "ID:" + ID + " player:" + playerID + " type:" + type.getName() + " x:" + x + " y:" + y + " hitPoints:" + hitPoints + " shields:" + shields + " enemy:" + energy + " orderTimer:" + orderTimer + " order:" + order + " resource:" + resources;
-	}
+		return
+			"ID:" + ID +
+			" player:" + playerID +
+			" type:" + type.getName() +
+			" x:" + x +
+			" y:" + y +
+			" hitPoints:" + hitPoints +
+			" shields:" + shields +
+			" enemy:" + energy +
+			" orderTimer:" + orderTimer +
+			" order:" + order +
+			" resource:" + resources;
+		}
 
 	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ID;
-		return result;
-	}
+ 	public int hashCode() {
+ 		final int prime = 31;
+ 		int result = 1;
+ 		result = prime * result + ID;
+ 		return result;
+ 	}
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		UnitWME other = (UnitWME) obj;
-		if (ID != other.ID)
-			return false;
-		return true;
-	}
+ 	@Override
+ 	public boolean equals(Object obj) {
+ 		if (this == obj)
+ 			return true;
+ 		if (obj == null)
+ 			return false;
+ 		if (getClass() != obj.getClass())
+ 			return false;
+ 		UnitWME other = (UnitWME) obj;
+ 		if (ID != other.ID)
+ 			return false;
+ 		return true;
+ 	}
 }
+
+ 

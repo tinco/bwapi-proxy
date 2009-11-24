@@ -392,6 +392,11 @@ void ClientModule::onFrame()
 		index = append(addonID, sendBuffer, index);
 		sendBuffer[index++] = ';';
 		index = append((*i)->getSpiderMineCount(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->getVelocityX(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->getVelocityY(), sendBuffer, index);
+		
 	} 
 
 	sendBuffer[index++] = '\n';
