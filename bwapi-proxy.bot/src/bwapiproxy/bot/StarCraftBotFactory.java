@@ -2,17 +2,24 @@ package bwapiproxy.bot;
 
 import bwapiproxy.bot.impl.ExampleStarCraftBot;
 
-
+/**
+ * Factory for the Bot
+ */
 public class StarCraftBotFactory {
 
-	private static StarCraftBot instance;
+	/** Your bot instance */
+	// TODO: use IoC to setup the bot
+	private static StarCraftBot instance = new ExampleStarCraftBot();
+	// private static StarCraftBot instance = new NullStarCraftBot();
 
 	private StarCraftBotFactory() {
-		//instance = new NullStarCraftBot();
-		instance = new ExampleStarCraftBot();
+
 	}
 
 	public static StarCraftBot getBot() {
+		if (instance == null) {
+			throw new IllegalStateException("Did you forget to call setBot() ?");
+		}
 		return instance;
 	}
 
