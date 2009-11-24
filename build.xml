@@ -1,0 +1,54 @@
+<project name="bwapi-proxy" default="dist" basedir=".">
+	<description>
+        The Java Proxy, Core Java library, Example Bots and Proxy UI
+    </description>
+
+	<property name="core" value="bwapi-proxy.core" />
+	<property name="bot" value="bwapi-proxy.bot" />
+	<property name="ui" value="bwapi-proxy.ui" />
+	<property name="proxy" value="bwapi-proxy.proxy" />
+
+	<property name="dist" location="dist" />
+	<property name="lib" location="${dist}/lib" />
+	<path id="classpath">
+		<fileset dir="${lib}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+	<target name="init">
+		<mkdir dir="${dist}" />
+		<mkdir dir="${lib}" />
+	</target>
+
+	<target name="compile" depends="init" description="compile the source ">
+		<ant dir="${core}" target="compile" />
+		<ant dir="${core}" target="dist" />
+
+		<ant dir="${bot}" target="compile" />
+		<ant dir="${bot}" target="dist" />
+
+		<ant dir="${ui}" target="compile" />
+		<ant dir="${ui}" target="dist" />
+
+		<ant dir="${proxy}" target="compile" />
+		<ant dir="${proxy}" target="dist" />
+	</target>
+
+	<target name="dist" depends="compile" description="generate the distribution">
+	</target>
+
+	<target name="run" depends="dist" description="run the proxy and starts the bot">
+		<java classname="bwapiproxy.proxy.ProxyBot">
+			<classpath refid="classpath" />
+		</java>
+	</target>
+
+	<target name="clean" description="clean up">
+		<ant dir="${core}" target="clean" />
+		<ant dir="${bot}" target="clean" />
+		<ant dir="${ui}" target="clean" />
+		<ant dir="${proxy}" target="clean" />
+		<delete dir="${dist}" />
+	</target>
+</project>

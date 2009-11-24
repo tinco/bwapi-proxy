@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/bwapi-proxy.bot"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/bwapi-proxy.core"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/bwapi-proxy.ui"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
