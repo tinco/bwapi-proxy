@@ -6,10 +6,7 @@ import java.util.Queue;
 import java.util.Set;
 /**
  * Stores tile information about a map in StarCraft.
- * 
- * Note: internally in StarCraft, the height and walkable arrays have a higher
- *       resolution than the size tile in this class. Each tile is actually
- *       a 4x4 grid, but this has been abstracted away for simplicity for now.
+ *
  */
 public class MapWME {
 
@@ -53,10 +50,10 @@ public class MapWME {
 	}
 	
 	/**
-	 * Returns true if the map is walkable and the given tile coordinates.
+	 * Returns true if the map is walkable at the given walk tile coordinates.
 	 */
-	public boolean isWalkable(int tx, int ty) {
-		return walkable[ty][tx];
+	public boolean isWalkable(int wx, int wy) {
+		return walkable[wy][wx];
 	}
 	
 	/**
@@ -84,43 +81,50 @@ public class MapWME {
 
 	
 	/**
-	 * Returns the height of the map at the given tile coordinates.
+	 * Returns the height of the map at the given walk tile coordinates.
 	 */
-	public int getHeight(int tx, int ty) {
-		return height[ty][tx];
+	public int getHeight(int wx, int wy) {
+		return height[wy][wx];
 	}
 	
 	/**
 	 * Creates a map based on the string recieved from the AIModule.
 	 * 
-	 * @param mapData - mapname:width:height:data
+	 * @param mapData - mapname:width:height:builddata:heightdata:walkdata
 	 * 
-	 *  Data is a character array where each tile is represented by 3 characters, 
-	 *  which specific height, buildable, walkable.
+	 *  The data fields are character arrays in which each character is a tile,
+	 *  the characters specify height, buildable and walkable.
 	 */
 	public MapWME(String mapData) {
 		String[] map = mapData.split(":");
-		String data = map[3];
+		String buildData = map[3];
+		String heightData = map[4];
+		String walkData = map[5];
 
 		mapName = map[0];
 		mapWidth = Integer.parseInt(map[1]);
 		mapHeight = Integer.parseInt(map[2]);
-		
+
 		height = new int[mapHeight][mapWidth];
-		buildable = new boolean[mapHeight][mapWidth];
-		walkable = new boolean[mapHeight][mapWidth];
-		
+		buildable = new boolean[mapHeight * 4][mapWidth * 4];
+		walkable = new boolean[mapHeight * 4][mapWidth * 4];
+
 		int total = mapWidth * mapHeight;		
 		for (int i=0; i<total; i++) {
 			int w = i%mapWidth;
 			int h = i/mapWidth;
-			
-			String tile = data.substring(3*i, 3*i + 3);
-			
-			height[h][w] = Integer.parseInt(tile.substring(0,1));
-			buildable[h][w] = (1 == Integer.parseInt(tile.substring(1,2))); 
-			walkable[h][w] = (1 == Integer.parseInt(tile.substring(2,3))); 
- 		}		
+
+			buildable[h][w] = ("1" == buildData[i]);
+		}		
+
+		int total = mapWidth * 4 * mapHeight * 4;
+		for (int i=0; i < total;i++) {
+			int w = i%mapWidth;
+			int h = i/mapWidth;
+
+			walkable[h][w] = ("1" == walkData[i]);
+			height[h][w] = Integer.parseInt(heightData[i]);
+		}
 	}
 	
 	/**
@@ -142,8 +146,8 @@ public class MapWME {
 
 		System.out.println("\nWalkable");
 	 	  System.out.println("--------");
-		for (int y=0; y<mapHeight; y++) {
-			for (int x=0; x<mapWidth; x++) {
+		for (int y=0; y<mapHeight*4; y++) {
+			for (int x=0; x<mapWidth*4; x++) {
 				System.out.print(walkable[y][x] ? " " : "X");
 			}			
 			
@@ -152,8 +156,8 @@ public class MapWME {
 
 		System.out.println("\nHeight");
 	 	  System.out.println("------");
-		for (int y=0; y<mapHeight; y++) {
-			for (int x=0; x<mapWidth; x++) {
+		for (int y=0; y<mapHeight*4; y++) {
+			for (int x=0; x<mapWidth*4; x++) {
 				switch (height[y][x]) {
 					case 2:
 						System.out.print(" " );
