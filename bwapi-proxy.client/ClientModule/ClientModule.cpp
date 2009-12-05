@@ -1,16 +1,16 @@
 /**
- * AIModule implementation for communicating with a remote java process (ProxyBot).
- *
- * Uses the winsock library for sockets, include "wsock32.lib" in the linker inputs
- *
- * Note: this implementation uses a blocking socket. On each frame, an update message is
- *       sent to the ProxyBot, then the socket waits for a command message from the 
- *		 ProxyBot. The process blocks while waiting for a response, so the ProxyBot
- *		 should immediately respond to updates.
- *
- * TODO: modify core BWAPI to assign IDs to units and provide a way of retrieving
- *       units by their ID 
- */
+* AIModule implementation for communicating with a remote java process (ProxyBot).
+*
+* Uses the winsock library for sockets, include "wsock32.lib" in the linker inputs
+*
+* Note: this implementation uses a blocking socket. On each frame, an update message is
+*       sent to the ProxyBot, then the socket waits for a command message from the 
+*		 ProxyBot. The process blocks while waiting for a response, so the ProxyBot
+*		 should immediately respond to updates.
+*
+* TODO: modify core BWAPI to assign IDs to units and provide a way of retrieving
+*       units by their ID 
+*/
 #include "ClientModule.h"
 using namespace BWAPI;
 
@@ -79,8 +79,8 @@ BWAPI::Unit* getUnit(int unitID);
 int append(int val, char* buf, int currentIndex);
 
 /**
- * Called at the start of a match. 
- */
+* Called at the start of a match.
+*/
 void ClientModule::onStart()
 {
 	loadTypeMaps();
@@ -122,10 +122,10 @@ void ClientModule::onStart()
 		bool ally = Broodwar->self()->isAlly(*i);
 
 		ack += ":" + toString(id)
-			 + ";" + race
-			 + ";" + name 
-			 + ";" + toString(type)
-			 + ";" + (ally ? "1" : "0");
+			+ ";" + race
+			+ ";" + name 
+			+ ";" + toString(type)
+			+ ";" + (ally ? "1" : "0");
 	}
 
 	ack += "\n";
@@ -145,12 +145,12 @@ void ClientModule::onStart()
 	for(std::set<TilePosition>::iterator i=startSpots.begin();i!=startSpots.end();i++)
 	{
 		locations += ":" + toString(i->x())
-				   + ";" + toString(i->y());
+			+ ";" + toString(i->y());
 	}
 
 	locations += "\n";
-    char *slBuf = (char*)locations.c_str();
-    send(proxyBotSocket, slBuf, locations.size(), 0);
+	char *slBuf = (char*)locations.c_str();
+	send(proxyBotSocket, slBuf, locations.size(), 0);
 
 	// 4. send the map data
 	std::string mapName = Broodwar->mapName();
@@ -166,7 +166,7 @@ void ClientModule::onStart()
 
 	for (int y=0; y<mapHeight; y++) {	
 		for (int x=0; x<mapWidth; x++) {
-			mapData += (Broodwar->buildable(x, y)) ? "1" : "0";
+			mapData += (Broodwar->isBuildable(x, y)) ? "1" : "0";
 		}
 	}
 
@@ -174,8 +174,8 @@ void ClientModule::onStart()
 
 	for (int y=0; y < mapHeight * 4; y++) {
 		for (int x=0; x < mapWidth * 4; x++) {
-			heightData += toString(Broodwar->groundHeight(x, y));
-			walkData += (Broodwar->walkable(x, y)) ? "1" : "0";
+			heightData += toString(Broodwar->getGroundHeight(x, y));
+			walkData += (Broodwar->isWalkable(x, y)) ? "1" : "0";
 		}
 	}
 
@@ -197,8 +197,8 @@ void ClientModule::onStart()
 		for (std::set<BWTA::Chokepoint*>::iterator i=chokepoints.begin();i!=chokepoints.end();i++)
 		{
 			chokes += ":" + toString((*i)->getCenter().x())
-					+ ";" + toString((*i)->getCenter().y())
-					+ ";" + toString((int)(*i)->getWidth());
+				+ ";" + toString((*i)->getCenter().y())
+				+ ";" + toString((int)(*i)->getWidth());
 		}
 
 		chokes += "\n";
@@ -211,85 +211,85 @@ void ClientModule::onStart()
 		for (std::set<BWTA::BaseLocation*>::iterator i=baseLocation.begin();i!=baseLocation.end();i++)
 		{
 			bases += ":" + toString((*i)->getTilePosition().x())
-				   + ";" + toString((*i)->getTilePosition().y());
+				+ ";" + toString((*i)->getTilePosition().y());
 		}
 
 		bases += "\n";
 		char *sbbuf = (char*)bases.c_str();
 		send(proxyBotSocket, sbbuf, bases.size(), 0);
 	}
-/*
+	/*
 	// 7. Send unit type data
-	  std::set<UnitType> types = UnitTypes::allUnitTypes();
-	  for(std::set<UnitType>::iterator i=types.begin();i!=types.end();i++)
-	  {
-		  int id = i->getID();
-		  std::string race = i->getRace().getName();
-		  std::string name = i->getName();
-		  int minerals = i->mineralPrice();
-		  int gas = i->gasPrice();
-		  int hitPoints = i->maxHitPoints()/256;
-		  int shields = i->maxShields();
-		  int energy = i->maxEnergy();
-		  int buildTime = i->buildTime();
-		  bool canAttack = i->canAttack();
-		  bool canMove = i->canMove();
-		  int width = i->tileWidth();
-		  int height = i->tileHeight();
-		  int supplyRequired = i->supplyRequired();
-		  int supplyProvided = i->supplyProvided();
-		  int sightRange = i->sightRange();
-		  int groundMaxRange = i->groundWeapon()->maxRange();
-		  int groundMinRange = i->groundWeapon()->minRange();
-		  int groundDamage = i->groundWeapon()->damageAmount();
-		  int airRange = i->airWeapon()->maxRange();
-		  int airDamage = i->airWeapon()->damageAmount();
-		  bool isBuilding = i->isBuilding();
-		  bool isFlyer = i->isFlyer();
-		  bool isSpellCaster = i->isSpellcaster();
-		  bool isWorker = i->isWorker();
-		  int whatBuilds = i->whatBuilds().first->getID();
+	std::set<UnitType> types = UnitTypes::allUnitTypes();
+	for(std::set<UnitType>::iterator i=types.begin();i!=types.end();i++)
+	{
+	int id = i->getID();
+	std::string race = i->getRace().getName();
+	std::string name = i->getName();
+	int minerals = i->mineralPrice();
+	int gas = i->gasPrice();
+	int hitPoints = i->maxHitPoints()/256;
+	int shields = i->maxShields();
+	int energy = i->maxEnergy();
+	int buildTime = i->buildTime();
+	bool canAttack = i->canAttack();
+	bool canMove = i->canMove();
+	int width = i->tileWidth();
+	int height = i->tileHeight();
+	int supplyRequired = i->supplyRequired();
+	int supplyProvided = i->supplyProvided();
+	int sightRange = i->sightRange();
+	int groundMaxRange = i->groundWeapon()->maxRange();
+	int groundMinRange = i->groundWeapon()->minRange();
+	int groundDamage = i->groundWeapon()->damageAmount();
+	int airRange = i->airWeapon()->maxRange();
+	int airDamage = i->airWeapon()->damageAmount();
+	bool isBuilding = i->isBuilding();
+	bool isFlyer = i->isFlyer();
+	bool isSpellCaster = i->isSpellcaster();
+	bool isWorker = i->isWorker();
+	int whatBuilds = i->whatBuilds().first->getID();
 
-		  std::string unitType("UnitType");
-		  unitType += ":" + toString(id)
-				  + ";" + race
-				  + ";" + name
-				  + ";" + toString(minerals)
-				  + ";" + toString(gas)
-				  + ";" + toString(hitPoints)
-				  + ";" + toString(shields)
-				  + ";" + toString(energy)
-				  + ";" + toString(buildTime)
-				  + ";" + toString(canAttack)
-				  + ";" + toString(canMove)
-				  + ";" + toString(width)
-				  + ";" + toString(height)
-				  + ";" + toString(supplyRequired)
-				  + ";" + toString(supplyProvided)
-				  + ";" + toString(sightRange)
-				  + ";" + toString(groundMaxRange)
-				  + ";" + toString(groundMinRange)
-				  + ";" + toString(groundDamage)
-				  + ";" + toString(airRange)
-				  + ";" + toString(airDamage)
-				  + ";" + toString(isBuilding)
-				  + ";" + toString(isFlyer)
-				  + ";" + toString(isSpellCaster)
-				  + ";" + toString(isWorker)
-				  + ";" + toString(whatBuilds);
+	std::string unitType("UnitType");
+	unitType += ":" + toString(id)
+	+ ";" + race
+	+ ";" + name
+	+ ";" + toString(minerals)
+	+ ";" + toString(gas)
+	+ ";" + toString(hitPoints)
+	+ ";" + toString(shields)
+	+ ";" + toString(energy)
+	+ ";" + toString(buildTime)
+	+ ";" + toString(canAttack)
+	+ ";" + toString(canMove)
+	+ ";" + toString(width)
+	+ ";" + toString(height)
+	+ ";" + toString(supplyRequired)
+	+ ";" + toString(supplyProvided)
+	+ ";" + toString(sightRange)
+	+ ";" + toString(groundMaxRange)
+	+ ";" + toString(groundMinRange)
+	+ ";" + toString(groundDamage)
+	+ ";" + toString(airRange)
+	+ ";" + toString(airDamage)
+	+ ";" + toString(isBuilding)
+	+ ";" + toString(isFlyer)
+	+ ";" + toString(isSpellCaster)
+	+ ";" + toString(isWorker)
+	+ ";" + toString(whatBuilds);
 
-		  unitType += "\n";
-		char *subuf = (char*)unitType.c_str();
-		send(proxyBotSocket, subuf, unitType.size(), 0);
-	  }
-	  */
+	unitType += "\n";
+	char *subuf = (char*)unitType.c_str();
+	send(proxyBotSocket, subuf, unitType.size(), 0);
+	}
+	*/
 }
 
 /**
- * Runs every frame 
- *
- * Sends the unit status to the ProxyBot, then waits for a list of command messages.
- */
+* Runs every frame 
+*
+* Sends the unit status to the ProxyBot, then waits for a list of command messages.
+*/
 void ClientModule::onFrame()
 {
 	// check if the Proxy Bot is connected
@@ -309,7 +309,7 @@ void ClientModule::onFrame()
 		}
 	}
 
-    // 1. send the unit status's to the Proxy Bot
+	// 1. send the unit status's to the Proxy Bot
 	sendBuffer[0] = 's';
 	int index = 1;
 	sendBuffer[index++] = ';';
@@ -373,11 +373,9 @@ void ClientModule::onFrame()
 		sendBuffer[index++] = ';';
 		index = append((*i)->getType().getID(), sendBuffer, index);
 		sendBuffer[index++] = ';';
-//		index = append((*i)->getPosition().x()/32, sendBuffer, index);
-		index = append((*i)->getTilePosition().x(), sendBuffer, index);
+		index = append((*i)->getPosition().x(), sendBuffer, index);
 		sendBuffer[index++] = ';';
-//		index = append((*i)->getPosition().y()/32, sendBuffer, index);
-		index = append((*i)->getTilePosition().y(), sendBuffer, index);
+		index = append((*i)->getPosition().y(), sendBuffer, index);
 		sendBuffer[index++] = ';';
 		index = append((*i)->getHitPoints()/256, sendBuffer, index);
 		sendBuffer[index++] = ';';
@@ -409,8 +407,161 @@ void ClientModule::onFrame()
 		index = append((*i)->getVelocityX(), sendBuffer, index);
 		sendBuffer[index++] = ';';
 		index = append((*i)->getVelocityY(), sendBuffer, index);
-		
-	} 
+		/*-----------------------------*/
+		// ADDED STUFF:
+		/* ----------------------------*/
+
+		sendBuffer[index++] = ';';
+		index = append((*i)->getInitialHitPoints(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->getInitialResources(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->getKillCount(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->getGroundWeaponCooldown(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->getAirWeaponCooldown(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->getSpellCooldown(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->getDefenseMatrixPoints(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->getDefenseMatrixTimer(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->getEnsnareTimer(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->getIrradiateTimer(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->getLockdownTimer(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->getMaelstromTimer(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->getPlagueTimer(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->getRemoveTimer(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->getStasisTimer(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->getStimTimer(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->getAngle(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->getInterceptorCount(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->getScarabCount(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->exists(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isAccelerating(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isBeingConstructed(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		//index = append((*i)->isBeingGathered(), sendBuffer, index); <-- Not in this version of bwapi
+		//sendBuffer[index++] = ';';
+		index = append((*i)->isBeingHealed(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isBlind(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isBraking(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isBurrowed(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isCarryingGas(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isCarryingMinerals(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isCloaked(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isCompleted(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isConstructing(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isDefenseMatrixed(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isEnsnared(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isFollowing(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isGatheringGas(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isGatheringMinerals(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isHallucination(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isIdle(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isIrradiated(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isLifted(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isLoaded(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isLockedDown(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isMaelstrommed(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isMorphing(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isMoving(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isParasited(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isPatrolling(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isPlagued(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isRepairing(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isResearching(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isSelected(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isSieged(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isStartingAttack(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isStasised(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isStimmed(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isTraining(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isUnderStorm(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isUnpowered(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isUpgrading(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->isVisible(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->getTilePosition().x(), sendBuffer, index);
+		sendBuffer[index++] = ';';
+		index = append((*i)->getTilePosition().y(), sendBuffer, index);
+
+		/** non trivial methods: */
+		//getInitialType
+		//getPosition
+		//getInitialPosition
+		//getTilePosition
+		//getInitialTilePosition
+		//getDistance
+		//getDistance
+		//getUpgradeLevel
+		//getTarget
+		//getTargetPosition
+		//getOrderTarget
+		//getSecondaryOrder
+		//getBuildUnit
+		//getChild
+		/* getTrainingQueue */
+		//getTransport
+		//getLoadedUnits
+		//getTech
+		//getUpgrade
+		//getRallyPosition
+		//getRallyUnit
+		//getAddon
+	}
 
 	sendBuffer[index++] = '\n';
 	send(proxyBotSocket, sendBuffer, index, 0);
@@ -428,8 +579,8 @@ void ClientModule::onFrame()
 	// tokenize the commands
 	char* token = strtok(message, ":");
 	token = strtok(NULL, ":");			// eat the command part of the message
-    int commandCount = 0;
-    char* commands[100];
+	int commandCount = 0;
+	char* commands[100];
 
 	while (token != NULL) 
 	{
@@ -452,8 +603,8 @@ void ClientModule::onFrame()
 }
 
 /** 
- * Append a number to the char array.
- */
+* Append a number to the char array.
+*/
 int append(int val, char* buf, int currentIndex) 
 {
 
@@ -481,10 +632,10 @@ int append(int val, char* buf, int currentIndex)
 }
 
 /**
- * Executes the specified command with the given arguments. Does limited sanity checking.
- *
- * The command value is specified by the StarCraftCommand enumeration in Command.java.
- */
+* Executes the specified command with the given arguments. Does limited sanity checking.
+*
+* The command value is specified by the StarCraftCommand enumeration in Command.java.
+*/
 void handleCommand(int command, int unitID, int arg0, int arg1, int arg2)
 {
 	if (command == 41) {
@@ -503,12 +654,12 @@ void handleCommand(int command, int unitID, int arg0, int arg1, int arg2)
 	// execute the command
 	switch (command) {
 
-	    // virtual bool attackMove(Position position) = 0;
+		// virtual bool attackMove(Position position) = 0;
 		case 1:
 			if (logCommands) Broodwar->sendText("Unit:%d attackMove(%d, %d)",unitID, arg0, arg1);
 			unit->attackMove(getPosition(arg0, arg1));
 			break;
-		// virtual bool attackUnit(Unit* target) = 0;
+			// virtual bool attackUnit(Unit* target) = 0;
 		case 2:
 			if (getUnit(arg0) == NULL) {
 				Broodwar->sendText("Invalid Command, Unit:%d attackUnit(%d)", unitID, arg0);
@@ -518,12 +669,12 @@ void handleCommand(int command, int unitID, int arg0, int arg1, int arg2)
 				unit->attackUnit(getUnit(arg0));
 			}
 			break;
-		// virtual bool rightClick(Position position) = 0;
+			// virtual bool rightClick(Position position) = 0;
 		case 3:
 			if (logCommands) Broodwar->sendText("Unit:%d rightClick(%d, %d)",unitID, arg0, arg1);
 			unit->rightClick(getPosition(arg0, arg1));
 			break;
-		// virtual bool rightClick(Unit* target) = 0;
+			// virtual bool rightClick(Unit* target) = 0;
 		case 4:
 			if (getUnit(arg0) == NULL) {
 				Broodwar->sendText("Invalid Command, Unit:%d rightClick(%d)", unitID, arg0);
@@ -533,7 +684,7 @@ void handleCommand(int command, int unitID, int arg0, int arg1, int arg2)
 				unit->rightClick(getUnit(arg0));
 			}
 			break;
-		// virtual bool train(UnitType type) = 0;
+			// virtual bool train(UnitType type) = 0;
 		case 5:
 			if (getUnitType(arg0) < 0) { // NULL doesnt work here, NULL = 0, Terran_Marine=0
 				Broodwar->sendText("Invalid Command, Unit:%d train(%d)", unitID, arg0);
@@ -543,9 +694,9 @@ void handleCommand(int command, int unitID, int arg0, int arg1, int arg2)
 				unit->train(getUnitType(arg0));
 			}
 			break;
-		// virtual bool build(TilePosition position, UnitType type) = 0;
+			// virtual bool build(TilePosition position, UnitType type) = 0;
 		case 6:
-//			Broodwar->drawBox(CoordinateType::Map, 32*arg0, 32*arg1, 32*arg0 + 96, 32*arg1 + 64, Colors::Yellow, true);
+			//			Broodwar->drawBox(CoordinateType::Map, 32*arg0, 32*arg1, 32*arg0 + 96, 32*arg1 + 64, Colors::Yellow, true);
 			if (getUnitType(arg2) == NULL) {
 			}
 			else {
@@ -553,7 +704,7 @@ void handleCommand(int command, int unitID, int arg0, int arg1, int arg2)
 				unit->build(getTilePosition(arg0, arg1), getUnitType(arg2));
 			}
 			break;
-		// virtual bool buildAddon(UnitType type) = 0;
+			// virtual bool buildAddon(UnitType type) = 0;
 		case 7:
 			if (getUnitType(arg0) == NULL) {
 				Broodwar->sendText("Invalid Command, Unit:%d buildAddon(%d)", unitID, arg0);
@@ -563,7 +714,7 @@ void handleCommand(int command, int unitID, int arg0, int arg1, int arg2)
 				unit->buildAddon(getUnitType(arg0));
 			}
 			break;
-		// virtual bool research(TechType tech) = 0;
+			// virtual bool research(TechType tech) = 0;
 		case 8:
 			if (getTechType(arg0) == NULL) {
 				Broodwar->sendText("Invalid Command, Unit:%d research(%d)", unitID, arg0);
@@ -573,7 +724,7 @@ void handleCommand(int command, int unitID, int arg0, int arg1, int arg2)
 				unit->research(getTechType(arg0));
 			}
 			break;
-		// virtual bool upgrade(UpgradeType upgrade) = 0;
+			// virtual bool upgrade(UpgradeType upgrade) = 0;
 		case 9:
 			if (getUpgradeType(arg0) == NULL) {
 				Broodwar->sendText("Invalid Command, Unit:%d upgrade(%d)", unitID, arg0);
@@ -583,22 +734,22 @@ void handleCommand(int command, int unitID, int arg0, int arg1, int arg2)
 				unit->upgrade(getUpgradeType(arg0));
 			}
 			break;
-		// virtual bool stop() = 0;
+			// virtual bool stop() = 0;
 		case 10:
 			if (logCommands) Broodwar->sendText("Unit:%d stop()", unitID);
 			unit->stop();
 			break;
-		// virtual bool holdPosition() = 0;
+			// virtual bool holdPosition() = 0;
 		case 11:
 			if (logCommands) Broodwar->sendText("Unit:%d holdPosition()", unitID);
 			unit->holdPosition();
 			break;
-		// virtual bool patrol(Position position) = 0;
+			// virtual bool patrol(Position position) = 0;
 		case 12:
 			if (logCommands) Broodwar->sendText("Unit:%d patrol(%d, %d)", unitID, arg0, arg1);
 			unit->patrol(getPosition(arg0, arg1));
 			break;
-		// virtual bool follow(Unit* target) = 0;
+			// virtual bool follow(Unit* target) = 0;
 		case 13:
 			if (getUnit(arg0) == NULL) {
 				Broodwar->sendText("Invalid Command, Unit:%d follow(%d)", unitID, arg0);
@@ -608,12 +759,12 @@ void handleCommand(int command, int unitID, int arg0, int arg1, int arg2)
 				unit->follow(getUnit(arg0));
 			}
 			break;
-		// virtual bool setRallyPosition(Position target) = 0;
+			// virtual bool setRallyPosition(Position target) = 0;
 		case 14:
 			if (logCommands) Broodwar->sendText("Unit:%d setRallyPosition(%d, %d)", unitID, arg0, arg1);
 			unit->setRallyPosition(getPosition(arg0, arg1));
 			break;
-		// virtual bool setRallyUnit(Unit* target) = 0;
+			// virtual bool setRallyUnit(Unit* target) = 0;
 		case 15:
 			if (getUnit(arg0) == NULL) {
 				Broodwar->sendText("Invalid Command, Unit:%d setRallyUnit(%d)", unitID, arg0);
@@ -623,7 +774,7 @@ void handleCommand(int command, int unitID, int arg0, int arg1, int arg2)
 				unit->setRallyUnit(getUnit(arg0));
 			}
 			break;
-		// virtual bool repair(Unit* target) = 0;
+			// virtual bool repair(Unit* target) = 0;
 		case 16:
 			if (getUnit(arg0) == NULL) {
 				Broodwar->sendText("Invalid Command, Unit:%d repair(%d)", unitID, arg0);
@@ -633,7 +784,7 @@ void handleCommand(int command, int unitID, int arg0, int arg1, int arg2)
 				unit->repair(getUnit(arg0));
 			}
 			break;
-		// virtual bool morph(UnitType type) = 0;
+			// virtual bool morph(UnitType type) = 0;
 		case 17:
 			if (getUnitType(arg0) == NULL) {
 				Broodwar->sendText("Invalid Command, Unit:%d morph(%d)", unitID, arg0);
@@ -643,47 +794,47 @@ void handleCommand(int command, int unitID, int arg0, int arg1, int arg2)
 				unit->morph(getUnitType(arg0));
 			}
 			break;
-		// virtual bool burrow() = 0;
+			// virtual bool burrow() = 0;
 		case 18:
 			if (logCommands) Broodwar->sendText("Unit:%d burrow()", unitID);
 			unit->burrow();
 			break;
-		// virtual bool unburrow() = 0;
+			// virtual bool unburrow() = 0;
 		case 19:
 			if (logCommands) Broodwar->sendText("Unit:%d unburrow()", unitID);
 			unit->unburrow();
 			break;
-		// virtual bool siege() = 0;
+			// virtual bool siege() = 0;
 		case 20:
 			if (logCommands) Broodwar->sendText("Unit:%d siege()", unitID);
 			unit->siege();
 			break;
-		// virtual bool unsiege() = 0;
+			// virtual bool unsiege() = 0;
 		case 21:
 			if (logCommands) Broodwar->sendText("Unit:%d unsiege()", unitID);
 			unit->unsiege();
 			break;
-		// virtual bool cloak() = 0;
+			// virtual bool cloak() = 0;
 		case 22:
 			if (logCommands) Broodwar->sendText("Unit:%d cloak()", unitID);
 			unit->cloak();
 			break;
-		// virtual bool decloak() = 0;
+			// virtual bool decloak() = 0;
 		case 23:
 			if (logCommands) Broodwar->sendText("Unit:%d decloak()", unitID);
 			unit->decloak();
 			break;
-		// virtual bool lift() = 0;
+			// virtual bool lift() = 0;
 		case 24:
 			if (logCommands) Broodwar->sendText("Unit:%d lift()", unitID);
 			unit->lift();
 			break;
-		// virtual bool land(TilePosition position) = 0;
+			// virtual bool land(TilePosition position) = 0;
 		case 25:
 			if (logCommands) Broodwar->sendText("Unit:%d land(%d, %d)", unitID, arg0, arg1);
 			unit->land(getTilePosition(arg0, arg1));
 			break;
-		// virtual bool load(Unit* target) = 0;
+			// virtual bool load(Unit* target) = 0;
 		case 26:
 			if (getUnit(arg0) == NULL) {
 				Broodwar->sendText("Invalid Command, Unit:%d load(%d)", unitID, arg0);
@@ -693,7 +844,7 @@ void handleCommand(int command, int unitID, int arg0, int arg1, int arg2)
 				unit->load(getUnit(arg0));
 			}
 			break;
-		// virtual bool unload(Unit* target) = 0;
+			// virtual bool unload(Unit* target) = 0;
 		case 27:
 			if (getUnit(arg0) == NULL) {
 				Broodwar->sendText("Invalid Command, Unit:%d unload(%d)", unitID, arg0);
@@ -703,57 +854,57 @@ void handleCommand(int command, int unitID, int arg0, int arg1, int arg2)
 				unit->unload(getUnit(arg0));
 			}
 			break;
-		// virtual bool unloadAll() = 0;
+			// virtual bool unloadAll() = 0;
 		case 28:
 			if (logCommands) Broodwar->sendText("Unit:%d unloadAll()", unitID);
 			unit->unloadAll();
 			break;
-		// virtual bool unloadAll(Position position) = 0;
+			// virtual bool unloadAll(Position position) = 0;
 		case 29:
 			if (logCommands) Broodwar->sendText("Unit:%d unloadAll(%d, %d)", unitID, arg0, arg1);
 			unit->unloadAll(getPosition(arg0, arg1));
 			break;
-		// virtual bool cancelConstruction() = 0;
+			// virtual bool cancelConstruction() = 0;
 		case 30:
 			if (logCommands) Broodwar->sendText("Unit:%d cancelConstruction()", unitID);
 			unit->cancelConstruction();
 			break;
-		// virtual bool haltConstruction() = 0;
+			// virtual bool haltConstruction() = 0;
 		case 31:
 			if (logCommands) Broodwar->sendText("Unit:%d haltConstruction()", unitID);
 			unit->haltConstruction();
 			break;
-		// virtual bool cancelMorph() = 0;
+			// virtual bool cancelMorph() = 0;
 		case 32:
 			if (logCommands) Broodwar->sendText("Unit:%d cancelMorph()", unitID);
 			unit->cancelMorph();
 			break;
-		// virtual bool cancelTrain() = 0;
+			// virtual bool cancelTrain() = 0;
 		case 33:
 			if (logCommands) Broodwar->sendText("Unit:%d cancelTrain()", unitID);
 			unit->cancelTrain();
 			break;
-		// virtual bool cancelTrain(int slot) = 0;
+			// virtual bool cancelTrain(int slot) = 0;
 		case 34:
 			if (logCommands) Broodwar->sendText("Unit:%d cancelTrain(%d)", unitID, arg0);
 			unit->cancelTrain(arg0);
 			break;
-		// virtual bool cancelAddon() = 0;
+			// virtual bool cancelAddon() = 0;
 		case 35:
 			if (logCommands) Broodwar->sendText("Unit:%d cancelAddon()", unitID);
 			unit->cancelAddon();
 			break;
-		// virtual bool cancelResearch() = 0;
+			// virtual bool cancelResearch() = 0;
 		case 36:
 			if (logCommands) Broodwar->sendText("Unit:%d cancelResearch()", unitID);
 			unit->cancelResearch();
 			break;
-		// virtual bool cancelUpgrade() = 0;
+			// virtual bool cancelUpgrade() = 0;
 		case 37:
 			if (logCommands) Broodwar->sendText("Unit:%d cancelUpgrade()", unitID);
 			unit->cancelUpgrade();
 			break;
-		// virtual bool useTech(TechType tech) = 0;
+			// virtual bool useTech(TechType tech) = 0;
 		case 38:
 			if (getTechType(arg0) == NULL) {
 				Broodwar->sendText("Invalid Command, Unit:%d useTech(%d)", unitID, arg0);
@@ -763,7 +914,7 @@ void handleCommand(int command, int unitID, int arg0, int arg1, int arg2)
 				unit->useTech(getTechType(arg0));
 			}
 			break;
-		// virtual bool useTech(TechType tech, Position position) = 0;
+			// virtual bool useTech(TechType tech, Position position) = 0;
 		case 39:
 			if (getTechType(arg0) == NULL) {
 				Broodwar->sendText("Invalid Command, Unit:%d useTech(%d, %d, %d)", unitID, arg0, arg1, arg2);
@@ -773,7 +924,7 @@ void handleCommand(int command, int unitID, int arg0, int arg1, int arg2)
 				unit->useTech(getTechType(arg0), getPosition(arg1, arg2));
 			}
 			break;
-		// virtual bool useTech(TechType tech, Unit* target) = 0;
+			// virtual bool useTech(TechType tech, Unit* target) = 0;
 		case 40:
 			if (getTechType(arg0) == NULL || getUnit(arg1) == NULL) {
 				Broodwar->sendText("Invalid Command, Unit:%d useTech(%d, %d)", unitID, arg0, arg1);
@@ -789,9 +940,9 @@ void handleCommand(int command, int unitID, int arg0, int arg1, int arg2)
 }
 
 /**
- * Called at the end of a game. This is where we shut down sockets and clean
- * up any data structures we have created.
- */
+* Called at the end of a game. This is where we shut down sockets and clean
+* up any data structures we have created.
+*/
 void ClientModule::onEnd() 
 {
 	if (proxyBotSocket == -1) {
@@ -803,12 +954,12 @@ void ClientModule::onEnd()
 
 void ClientModule::onUnitCreate(Unit* unit)
 {
-	
+
 }
 
 /**
- * Removes the unit from the ID->unit mapping
- */
+* Removes the unit from the ID->unit mapping
+*/
 void ClientModule::onUnitDestroy(BWAPI::Unit* unit)
 {
 	int key = unitMap.erase(unit);
@@ -821,29 +972,29 @@ bool ClientModule::onSendText(std::string text)
 }
 
 /**
- * Utility function for constructing a Position.
- *
- * Note: positions are in pixel coordinates, while the inputs are given in tile coordinates
- */
+* Utility function for constructing a Position.
+*
+* Note: positions are in pixel coordinates, while the inputs are given in tile coordinates
+*/
 Position getPosition(int x, int y)
 {
 	return BWAPI::Position(pixelsPerTile*x, pixelsPerTile*y);
 }
 
 /**
- * Utility function for constructing a TilePosition.
- *
- * Note: not sure if this is correct, is there a way to get a tile position
- *       object from the api rather than create a new one?
- */
+* Utility function for constructing a TilePosition.
+*
+* Note: not sure if this is correct, is there a way to get a tile position
+*       object from the api rather than create a new one?
+*/
 TilePosition getTilePosition(int x, int y)
 {
 	return BWAPI::TilePosition(x, y);
 }
 
 /**
- * Utiliity function for int to string conversion.
- */
+* Utiliity function for int to string conversion.
+*/
 std::string toString(int value) 
 {
 	std::stringstream ss;
@@ -852,8 +1003,8 @@ std::string toString(int value)
 }
 
 /**
- * Utiliity function for bool to string conversion.
- */
+* Utiliity function for bool to string conversion.
+*/
 std::string toString(bool value) 
 {
 	if (value) return std::string("1");
@@ -861,40 +1012,40 @@ std::string toString(bool value)
 }
 
 /**
- * Returns the unit based on the unit ID
- */
+* Returns the unit based on the unit ID
+*/
 Unit* getUnit(int unitID)
 {
 	return unitIDMap[unitID];
 }
 
 /** 
- * Returns the unit type from its identifier
- */
+* Returns the unit type from its identifier
+*/
 UnitType getUnitType(int type) 
 {
 	return unitTypeMap[type];
 }
 
 /** 
- * Returns the tech type from its identifier
- */
+* Returns the tech type from its identifier
+*/
 TechType getTechType(int type) 
 {
 	return techTypeMap[type];
 }
 
 /** 
- * Returns the upgrade type from its identifier
- */
+* Returns the upgrade type from its identifier
+*/
 UpgradeType getUpgradeType(int type)
 {
 	return upgradeTypeMap[type];
 }
 
 /**
- * Utility function for appending data to a file.
- */
+* Utility function for appending data to a file.
+*/
 void append(FILE *log, std::string data) {
 	data += "\n";
 	fprintf(log, (char*)data.c_str());
@@ -902,190 +1053,190 @@ void append(FILE *log, std::string data) {
 }
 
 /**
- * Builds the mapping of Indices to actual BW objects.
- */
+* Builds the mapping of Indices to actual BW objects.
+*/
 void loadTypeMaps() 
 {
-  std::set<UnitType> types = UnitTypes::allUnitTypes();
-  for(std::set<UnitType>::iterator i=types.begin();i!=types.end();i++)
-  {
-	  unitTypeMap[i->getID()] = (*i);
-  }
+	std::set<UnitType> types = UnitTypes::allUnitTypes();
+	for(std::set<UnitType>::iterator i=types.begin();i!=types.end();i++)
+	{
+		unitTypeMap[i->getID()] = (*i);
+	}
 
-  std::set<TechType> tektypes = TechTypes::allTechTypes();
-  for(std::set<TechType>::iterator i=tektypes.begin();i!=tektypes.end();i++)
-  {
-	  techTypeMap[i->getID()] = (*i);
-  }
+	std::set<TechType> tektypes = TechTypes::allTechTypes();
+	for(std::set<TechType>::iterator i=tektypes.begin();i!=tektypes.end();i++)
+	{
+		techTypeMap[i->getID()] = (*i);
+	}
 
-  std::set<UpgradeType> upTypes = UpgradeTypes::allUpgradeTypes();
-  for(std::set<UpgradeType>::iterator i=upTypes.begin();i!=upTypes.end();i++)
-  {
-	  upgradeTypeMap[i->getID()] = (*i);
-  }
+	std::set<UpgradeType> upTypes = UpgradeTypes::allUpgradeTypes();
+	for(std::set<UpgradeType>::iterator i=upTypes.begin();i!=upTypes.end();i++)
+	{
+		upgradeTypeMap[i->getID()] = (*i);
+	}
 }
 
 /**
- * Exports static data about UnitTypes, TypeTypes, and UpgradeTypes to a text 
- * file name "TypeData.txt"
- */
+* Exports static data about UnitTypes, TypeTypes, and UpgradeTypes to a text 
+* file name "TypeData.txt"
+*/
 void exportStaticData() {
 
-  FILE *typeData = 0;
-  typeData = fopen("TypeData.txt", "w");
+	FILE *typeData = 0;
+	typeData = fopen("TypeData.txt", "w");
 
-  // Export unit type data
-  append(typeData, "UnitTypes");
-  append(typeData, "-id,race,name,mins,gas,hitPoints,shields,energy,buildTime,canAttack,canMove,width,height,supply,supplyProvided,sight,groundMaxRange,groundMinRange,groundDamage,airRange,airDamage,isBuilding,isFlyer,isSpellCaster,isWorker,whatBuilds");
+	// Export unit type data
+	append(typeData, "UnitTypes");
+	append(typeData, "-id,race,name,mins,gas,hitPoints,shields,energy,buildTime,canAttack,canMove,width,height,supply,supplyProvided,sight,groundMaxRange,groundMinRange,groundDamage,airRange,airDamage,isBuilding,isFlyer,isSpellCaster,isWorker,whatBuilds");
 
-  std::set<UnitType> types = UnitTypes::allUnitTypes();
-  for(std::set<UnitType>::iterator i=types.begin();i!=types.end();i++)
-  {
-	  int id = i->getID();
-	  std::string race = i->getRace().getName();
-	  std::string name = i->getName();
-	  int minerals = i->mineralPrice();
-	  int gas = i->gasPrice();
-	  int hitPoints = i->maxHitPoints()/256;
-	  int shields = i->maxShields();
-	  int energy = i->maxEnergy();
-	  int buildTime = i->buildTime();
-	  bool canAttack = i->canAttack();
-	  bool canMove = i->canMove();
-	  int width = i->tileWidth();
-	  int height = i->tileHeight();
-	  int supplyRequired = i->supplyRequired();
-	  int supplyProvided = i->supplyProvided();
-	  int sightRange = i->sightRange();
-	  int groundMaxRange = i->groundWeapon()->maxRange();
-	  int groundMinRange = i->groundWeapon()->minRange();
-	  int groundDamage = i->groundWeapon()->damageAmount();
-	  int airRange = i->airWeapon()->maxRange();
-	  int airDamage = i->airWeapon()->damageAmount();
-	  bool isBuilding = i->isBuilding();
-	  bool isFlyer = i->isFlyer();
-	  bool isSpellCaster = i->isSpellcaster();
-	  bool isWorker = i->isWorker();
-	  int whatBuilds = i->whatBuilds().first->getID();
+	std::set<UnitType> types = UnitTypes::allUnitTypes();
+	for(std::set<UnitType>::iterator i=types.begin();i!=types.end();i++)
+	{
+		int id = i->getID();
+		std::string race = i->getRace().getName();
+		std::string name = i->getName();
+		int minerals = i->mineralPrice();
+		int gas = i->gasPrice();
+		int hitPoints = i->maxHitPoints()/256;
+		int shields = i->maxShields();
+		int energy = i->maxEnergy();
+		int buildTime = i->buildTime();
+		bool canAttack = i->canAttack();
+		bool canMove = i->canMove();
+		int width = i->tileWidth();
+		int height = i->tileHeight();
+		int supplyRequired = i->supplyRequired();
+		int supplyProvided = i->supplyProvided();
+		int sightRange = i->sightRange();
+		int groundMaxRange = i->groundWeapon()->maxRange();
+		int groundMinRange = i->groundWeapon()->minRange();
+		int groundDamage = i->groundWeapon()->damageAmount();
+		int airRange = i->airWeapon()->maxRange();
+		int airDamage = i->airWeapon()->damageAmount();
+		bool isBuilding = i->isBuilding();
+		bool isFlyer = i->isFlyer();
+		bool isSpellCaster = i->isSpellcaster();
+		bool isWorker = i->isWorker();
+		int whatBuilds = i->whatBuilds().first->getID();
 
-	  std::string unitType(" UnitType");
-	  unitType += ":" + toString(id)
-			  + ":" + race
-			  + ":" + name
-			  + ":" + toString(minerals)
-			  + ":" + toString(gas)
-			  + ":" + toString(hitPoints)
-			  + ":" + toString(shields)
-			  + ":" + toString(energy)
-			  + ":" + toString(buildTime)
-			  + ":" + toString(canAttack)
-			  + ":" + toString(canMove)
-			  + ":" + toString(width)
-			  + ":" + toString(height)
-			  + ":" + toString(supplyRequired)
-			  + ":" + toString(supplyProvided)
-			  + ":" + toString(sightRange)
-			  + ":" + toString(groundMaxRange)
-			  + ":" + toString(groundMinRange)
-			  + ":" + toString(groundDamage)
-			  + ":" + toString(airRange)
-			  + ":" + toString(airDamage)
-			  + ":" + toString(isBuilding)
-			  + ":" + toString(isFlyer)
-			  + ":" + toString(isSpellCaster)
-			  + ":" + toString(isWorker)
-			  + ":" + toString(whatBuilds);
+		std::string unitType(" UnitType");
+		unitType += ":" + toString(id)
+			+ ":" + race
+			+ ":" + name
+			+ ":" + toString(minerals)
+			+ ":" + toString(gas)
+			+ ":" + toString(hitPoints)
+			+ ":" + toString(shields)
+			+ ":" + toString(energy)
+			+ ":" + toString(buildTime)
+			+ ":" + toString(canAttack)
+			+ ":" + toString(canMove)
+			+ ":" + toString(width)
+			+ ":" + toString(height)
+			+ ":" + toString(supplyRequired)
+			+ ":" + toString(supplyProvided)
+			+ ":" + toString(sightRange)
+			+ ":" + toString(groundMaxRange)
+			+ ":" + toString(groundMinRange)
+			+ ":" + toString(groundDamage)
+			+ ":" + toString(airRange)
+			+ ":" + toString(airDamage)
+			+ ":" + toString(isBuilding)
+			+ ":" + toString(isFlyer)
+			+ ":" + toString(isSpellCaster)
+			+ ":" + toString(isWorker)
+			+ ":" + toString(whatBuilds);
 
-	  append(typeData, unitType);
-  }
+		append(typeData, unitType);
+	}
 
-  // Export tech types
-  append(typeData, "TechTypes");
-  append(typeData, "-id,name,whatResearches,minerals,gas");
+	// Export tech types
+	append(typeData, "TechTypes");
+	append(typeData, "-id,name,whatResearches,minerals,gas");
 
-  std::set<TechType> tektypes = TechTypes::allTechTypes();
-  for(std::set<TechType>::iterator i=tektypes.begin();i!=tektypes.end();i++)
-  {
-	  int id = i->getID();
-	  std::string name = i->getName();
-	  int whatResearchesID = i->whatResearches()->getID(); 
-	  int mins = i->mineralPrice();
-	  int gas = i->gasPrice();
+	std::set<TechType> tektypes = TechTypes::allTechTypes();
+	for(std::set<TechType>::iterator i=tektypes.begin();i!=tektypes.end();i++)
+	{
+		int id = i->getID();
+		std::string name = i->getName();
+		int whatResearchesID = i->whatResearches()->getID(); 
+		int mins = i->mineralPrice();
+		int gas = i->gasPrice();
 
-	  std::string techType(" TechType"); 
-	  techType += ":" + toString(id)
-				+ ":" + name
-				+ ":" + toString(whatResearchesID)
-				+ ":" + toString(mins)
-				+ ":" + toString(gas);
+		std::string techType(" TechType"); 
+		techType += ":" + toString(id)
+			+ ":" + name
+			+ ":" + toString(whatResearchesID)
+			+ ":" + toString(mins)
+			+ ":" + toString(gas);
 
-	  append(typeData, techType);
-  }
+		append(typeData, techType);
+	}
 
-  // Export upgrade types
-  append(typeData, "UpgradeTypes");
-  append(typeData, "-id,name,whatUpgrades,repeats,minBase,minFactor,gasBase,gasFactor");
+	// Export upgrade types
+	append(typeData, "UpgradeTypes");
+	append(typeData, "-id,name,whatUpgrades,repeats,minBase,minFactor,gasBase,gasFactor");
 
-  std::set<UpgradeType> upTypes = UpgradeTypes::allUpgradeTypes();
-  for(std::set<UpgradeType>::iterator i=upTypes.begin();i!=upTypes.end();i++)
-  {
-	  int id = i->getID();
-	  std::string name = i->getName();
-	  int whatUpgradesID = i->whatUpgrades()->getID(); // unit type id of what researches it
-	  int repeats = i->maxRepeats();
-	  int minBase = i->mineralPriceBase();
-	  int minFactor = i->mineralPriceFactor();
-	  int gasBase = i->gasPriceBase();
-	  int gasFactor = i->gasPriceFactor();
-	  
-	  std::string upgradeType(" UpgradeType"); 
-	  upgradeType += ":" + toString(id)
-				  + ":" + name
-				  + ":" + toString(whatUpgradesID)
-				  + ":" + toString(repeats)
-				  + ":" + toString(minBase)
-				  + ":" + toString(minFactor)
-				  + ":" + toString(gasBase)
-				  + ":" + toString(gasFactor);
+	std::set<UpgradeType> upTypes = UpgradeTypes::allUpgradeTypes();
+	for(std::set<UpgradeType>::iterator i=upTypes.begin();i!=upTypes.end();i++)
+	{
+		int id = i->getID();
+		std::string name = i->getName();
+		int whatUpgradesID = i->whatUpgrades()->getID(); // unit type id of what researches it
+		int repeats = i->maxRepeats();
+		int minBase = i->mineralPriceBase();
+		int minFactor = i->mineralPriceFactor();
+		int gasBase = i->gasPriceBase();
+		int gasFactor = i->gasPriceFactor();
 
-	  append(typeData, upgradeType);
-  }
+		std::string upgradeType(" UpgradeType"); 
+		upgradeType += ":" + toString(id)
+			+ ":" + name
+			+ ":" + toString(whatUpgradesID)
+			+ ":" + toString(repeats)
+			+ ":" + toString(minBase)
+			+ ":" + toString(minFactor)
+			+ ":" + toString(gasBase)
+			+ ":" + toString(gasFactor);
+
+		append(typeData, upgradeType);
+	}
 }
 
 /**
- * Establishes a connection with the ProxyBot.
- *
- * Returns -1 if the connection fails
- */
+* Establishes a connection with the ProxyBot.
+*
+* Returns -1 if the connection fails
+*/
 int initSocket() 
 {
-      int sockfd;
-      int size;
-      struct hostent *h;
-      struct sockaddr_in client_addr;
-      char myname[256];
-      WORD wVersionRequested;
-      WSADATA wsaData;
+	int sockfd;
+	int size;
+	struct hostent *h;
+	struct sockaddr_in client_addr;
+	char myname[256];
+	WORD wVersionRequested;
+	WSADATA wsaData;
 
-      wVersionRequested = MAKEWORD( 1, 1 );
-      WSAStartup( wVersionRequested, &wsaData );
-      gethostname(myname, 256);      
-      h=gethostbyname(myname);
+	wVersionRequested = MAKEWORD( 1, 1 );
+	WSAStartup( wVersionRequested, &wsaData );
+	gethostname(myname, 256);      
+	h=gethostbyname(myname);
 
-      size = sizeof(client_addr);
-      memset(&client_addr , 0 , sizeof(struct sockaddr_in));
-      memcpy((char *)&client_addr.sin_addr , h -> h_addr ,h -> h_length);
-     
-	  client_addr.sin_family = AF_INET;
-      client_addr.sin_port = htons(PORTNUM);
-      client_addr.sin_addr =  *((struct in_addr*) h->h_addr) ;
-      if ((sockfd = socket(AF_INET , SOCK_STREAM , 0)) == -1){
-		  return -1;
-      }
+	size = sizeof(client_addr);
+	memset(&client_addr , 0 , sizeof(struct sockaddr_in));
+	memcpy((char *)&client_addr.sin_addr , h -> h_addr ,h -> h_length);
 
-      if ((connect(sockfd , (struct sockaddr *)&client_addr , sizeof(client_addr))) == -1){
-		  return -1;
-	  }
+	client_addr.sin_family = AF_INET;
+	client_addr.sin_port = htons(PORTNUM);
+	client_addr.sin_addr =  *((struct in_addr*) h->h_addr) ;
+	if ((sockfd = socket(AF_INET , SOCK_STREAM , 0)) == -1){
+		return -1;
+	}
 
-	  return sockfd;
+	if ((connect(sockfd , (struct sockaddr *)&client_addr , sizeof(client_addr))) == -1){
+		return -1;
+	}
+
+	return sockfd;
 }
