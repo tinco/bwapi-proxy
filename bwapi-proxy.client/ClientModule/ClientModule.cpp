@@ -18,6 +18,8 @@ using namespace BWAPI;
 #include <stdio.h>
 #include <sstream>
 #include <string>
+#include <fstream>
+
 
 /** port to connect to on the java side */
 #define PORTNUM 12345
@@ -1210,33 +1212,46 @@ void exportStaticData() {
 */
 int initSocket() 
 {
-	int sockfd;
-	int size;
-	struct hostent *h;
-	struct sockaddr_in client_addr;
-	char myname[256];
-	WORD wVersionRequested;
-	WSADATA wsaData;
+    // get data from cfg
+    using namespace std;
+    ifstream fin("bwapi-data/AI/cfg.txt"); // cfg.txt should be stored in same
+    //  directory as ClientModule.dll under the starcraft parent folder. This is optional
 
-	wVersionRequested = MAKEWORD( 1, 1 );
-	WSAStartup( wVersionRequested, &wsaData );
-	gethostname(myname, 256);      
-	h=gethostbyname(myname);
+    string host_name;
+    int port;
+    if (fin.fail()) { // no config file. connect to localhost
+        host_name = "127.0.0.1";
+        port = PORTNUM;
+    } else { // config file. connect to ip/port
+        fin >> host_name;
+        fin >> port;
+        fin.close();
+    }
 
-	size = sizeof(client_addr);
-	memset(&client_addr , 0 , sizeof(struct sockaddr_in));
-	memcpy((char *)&client_addr.sin_addr , h -> h_addr ,h -> h_length);
+    WORD wVersionRequested;
+    WSADATA wsaData;
 
-	client_addr.sin_family = AF_INET;
-	client_addr.sin_port = htons(PORTNUM);
-	client_addr.sin_addr =  *((struct in_addr*) h->h_addr) ;
-	if ((sockfd = socket(AF_INET , SOCK_STREAM , 0)) == -1){
-		return -1;
-	}
+    wVersionRequested = MAKEWORD( 1, 1 );
+    WSAStartup(wVersionRequested, &wsaData);
 
-	if ((connect(sockfd , (struct sockaddr *)&client_addr , sizeof(client_addr))) == -1){
-		return -1;
-	}
+    unsigned long nRemoteAddr = inet_addr(host_name.c_str());
+    in_addr Address;
+    memcpy(&Address, &nRemoteAddr, sizeof(unsigned long));
 
-	return sockfd;
+    int sockfd;
+    if (((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1)) {
+        return -1;
+    }
+
+    sockaddr_in sinRemote;
+    sinRemote.sin_family = AF_INET;
+    sinRemote.sin_addr.s_addr = nRemoteAddr;
+    sinRemote.sin_port = htons(port);
+    if (connect(sockfd, (sockaddr*)&sinRemote, sizeof(sockaddr_in)) == 
+        SOCKET_ERROR) {
+            sockfd = INVALID_SOCKET;
+            return -1;
+    }
+
+    return sockfd;
 }
